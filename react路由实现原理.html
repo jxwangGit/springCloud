@@ -1,0 +1,88 @@
+<html>
+    <head>
+        
+    </head>
+    <body>
+      <div>
+          <button onclick="store.dispatch({
+            type: 'JIAN',
+            n: 2
+          })">-</button>
+          <span id="countDisplay">10</span>
+          <button onclick="store.dispatch({
+            type: 'JIA',
+            n: 2
+          })">+</button>
+      </div>
+       <script>
+         const countDisplay = document.querySelector('#countDisplay');
+         const countState = {
+           count: 5
+         }
+        
+         const reducer = (state = countState, action) => {
+          if(!state) {
+              return countState
+            }
+            switch(action.type){
+              case 'JIAN' : return {
+                ...state,
+                count: state.count - action.n
+              }
+              case 'JIA':return {
+                ...state,
+                count: state.count + action.n
+              } 
+              default:
+                 return state
+                break;
+
+            }
+             
+          }
+          const createStore = (reducer) => {
+            let state = null
+            const getState =  () =>{
+              return state
+            }
+            const listeners = [];
+            const subcribe = (listener) => {
+              listeners.push(listener);
+            }
+            const dispatch = (action) =>{
+               state = reducer(state,action)
+               listeners.forEach((listener) => listener())
+          }
+            return {
+              getState,
+              dispatch,
+              subcribe
+            }
+          }
+          const store = createStore(reducer);
+          const renderCount = () =>{
+             countDisplay.innerHTML = store.getState().count;
+          }
+          store.subcribe(renderCount);
+
+
+          // react 状态管理    个人感觉是最难的部分  在这里记一下笔记
+          // 1.新建reduce   这个是用来更改状态的  参数有（state, action）其中state就是状态值  action 就是动作
+          // 类型  一般是函数  返回一个对象值   reduce 更改状态值就是根据action.type 来判断是否更改
+          // 2 store = createStore 这里要用combineReduces 将reduce封装  然后导出即可  
+          //然后store.getState()返回的值就是这个reduce
+          // 3. 创建action 一般为函数  定义好动作类型  返回一个对象  返回的对象包括type: 字段  reduce更改state值就根据type
+          // 字端的值来返回
+          // 4.在需要用的地方先this.setState(store.getState())  返回一次状态   
+          // 然后store.subcribe(this.setState(store.getState())) 订阅  然后每次调用action就可以了
+
+          // 5.这里可以用react-redux  来实现不用每层都传store  只要定义mapState =(state) => {
+          //  return {
+          //    cartList: state.cart
+          // }
+          //  }
+          // 
+      </script>
+    </body>
+    
+</html>

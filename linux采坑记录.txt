@@ -1,0 +1,199 @@
+如果xshell 连接不上linux ，可能原因如下
+
+sudo psswd 首次给root用户设置密码
+
+上网查了查原因：
+
+       1：可能没有开启22端口，之后上网找命令开启了22端口，命令如下：
+
+    iptables -A INPUT -p tcp -m tcp --sport 22 -j ACCEPT  发现还是无法连接，又开始在网上找资料。发现可能是没有开启ssh server,接下来就是开启服务就好。命令如下：
+
+    sudo apt-get install openssh-server  安装
+
+sudo apt-get remove openssh-server  下载
+
+ubuntu 用apt 安装 
+centos 用 yum 安装
+
+jdk 安装
+系统环境变量 ： /etc/environment
+export JAVA_HOME=/usr/local/java/jdk1.8.0_241
+export JRE_HOME=/usr/local/java/jdk1.8.0_241/jre
+export CLASSPATH=$CLASSPATH:$JAVA_HOME/lib:$JAVA_HOME/jre/lib
+
+用户环境变量: /etc/profile
+export JAVA_HOME=/usr/local/java/jdk1.8.0_241
+export JRE_HOME=/usr/local/java/jdk1.8.0_241/jre
+export CLASSPATH=$CLASSPATH:$JAVA_HOME/lib:$JAVA_HOME/jre/lib
+export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH:$HOME/bin
+
+source /etc/profile  让配置的变量生效
+
+mysql 安装
+apt-get install mysql-server
+whereis mysql 查看mysql
+cd /etc/mysql进入mysql配置
+cat my.cnf 查看配置
+vim /etc/mysql/mysql.conf.d 查看mysql数据配置的地方
+/var/lib/mysql  存放数据的地方
+
+
+远程工具连不上数据库
+进入/etc/mysql/mysql.conf.d
+修改 bind-address  为          = 0.0.0.0
+
+vim /etc/mysql/debian.cnf 有mysql为我们提供的默认密码
+mysqladmin -u root -p password "wjx151364899419" 修改mysql 密码
+
+grant all privileges on *.* to 'root'@'%' identified by 'wjx151364899419' 来给数据库授权
+允许远程工具登录
+
+
+安装docker
+开始安装
+由于apt官方库里的docker版本可能比较旧，所以先卸载可能存在的旧版本：
+$ sudo apt-get remove docker docker-engine docker-ce docker.io
+更新apt包索引：
+$ sudo apt-get update
+安装以下包以使apt可以通过HTTPS使用存储库（repository）：
+$ sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+添加Docker官方的GPG密钥：
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+使用下面的命令来设置stable存储库：
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+再更新一下apt包索引：
+$ sudo apt-get update
+安装最新版本的Docker CE：
+$ sudo apt-get install -y docker-ce
+验证docker
+查看docker服务是否启动：
+$ systemctl status docker
+若未启动，则启动docker服务：
+$ sudo systemctl start docker
+经典的hello world：
+$ sudo docker run hello-world
+ 
+有以上输出,表示docker安装成功.
+
+docker 添加加速器
+
+1.编辑docker配置文件
+vi /etc/docker/daemon.json
+加入如下配置：
+{"registry-mirrors":["https://docker.mirrors.ustc.edu.cn"]}
+该链接为中科大加速器地址，无需注册。
+
+2. 执行命令生效
+systemctl daemon-reload 
+systemctl restart docker
+
+docker pull ubuntu:16.04  拉取镜像
+
+docker run -it --rm ubuntu:16.04 bash 启动ubuntu 镜像
+
+docker ps -a 查看正在运行的容器  docker container la -a 
+
+docker na容器id  重启容器
+
+docker rm image ubuntu:16.04
+
+docker container rm 容器id 删除容器
+
+docker container prune 删除所有未运行的容器
+
+docker exec -it 容器id bash 以交互的形式进入容器
+
+docker build -t myshop . 构建docker 镜像
+
+docker image prune  删除所有的虚悬镜像
+
+docker run -p 80:8080 tomcat   将宿主机的80端口映射到tomcat 容器的8080 端口
+
+EXPOSE 8080 暴露出8080端口
+
+CMD 运行容器命令
+
+ENV 设置环境变量
+
+docker run -p 8080:8080 --name tomcat  -d tomcat 守护态运行docker
+
+docker run -p 8080:8080 --name tomcat -d -v /usr/local/docker/tomcat/ROOT:/usr/local/tomcat/webapps/ROOT tomcat
+以数据卷的形式启动tomcat
+
+
+mysql 以数据卷的形式启动
+docker run -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=wjx151364899419 -d mysql:5.7.22 
+以守护态运行的形式启动mysql 
+
+docker run -p 3306:3306 --name mysql -v /usr/local/docker/mysql/conf:/etc/mysql -e MYSQL_ROOT_PASSWORD=wjx151364899419 -d mysql:5.7.22
+-v /usr/local/docker/mysql/logs:/var/log/mysql \
+-v /usr/local/docker/mysql/data:/var/lib/mysql \
+
+
+docker cp mysql:/etc/mysql . 将容器中的配置文件移动到宿主机
+
+mv *.* ..  移动文件到上级目录
+
+docker logs -f tomcat 查看docker 中tomcat 容器的日志
+
+docker rmi 镜像id docker 移除镜像
+
+apt-get autoremove docker-ce  移除docker 
+
+curl -L https://github.com/docker/compose/releases/download/1.25.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+安装docker-compose
+chmod +x /usr/local/bin/docker-compose  给docker-compose 添加权限
+
+docker-compose up -d启动
+docker-compose down 关闭
+
+docker-compose log tomcat  查看日志
+
+
+docker 创建 zookeeper 集群
+
+version: '3'
+services:
+    zoo1:
+        image: zookeeper
+        restart: always
+        container_name: zoo1
+        ports:
+            - "2181:2181"
+        environment:
+            ZOO_MY_ID: 1
+            ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+
+    zoo2:
+        image: zookeeper
+        restart: always
+        container_name: zoo2
+        ports:
+            - "2182:2181"
+        environment:
+            ZOO_MY_ID: 2
+            ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+
+    zoo3:
+        image: zookeeper
+        restart: always
+        container_name: zoo3
+        ports:
+            - "2183:2181"
+        environment:
+            ZOO_MY_ID: 3
+            ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+
+
+如果xftp 不能上传文件到linux 就用 chmod 777 file  添加权限
+
+./zkCli.sh -server localhost:2181 客户端连接服务端
+如果连接不上name就要修改zookper 配置文件 然后重启
+docker cp zookeeper_1:/conf/zoo.cfg . 将这个复制文件复制到宿主机  
+添加  clientPort=2181
+docker cp ./zoo.cfg zookeeper_1:/conf/  再将修改了的配置文件复制到zookper
+docker restart id 重启即可
+
+create /test "Hello zookeeper" 创建节点
+get /test  获取节点
+delete /test 删除节点

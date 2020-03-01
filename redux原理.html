@@ -1,0 +1,65 @@
+<html>
+    <head>
+        
+    </head>
+    <body>
+      <div>
+        <button onclick="store.dispatch({type: 'JIAN', n: 2})">-</button>
+        <span id="countDispay"></span>
+        <button onclick="store.dispatch({type: 'JIA', n: 3})">+</button>
+      </div>
+      <script>
+        const countState = {
+          count: 5
+        }
+        let countDispay = document.querySelector("#countDispay")
+        const reduce = (state,action) => {
+               if(!state){
+                 return countState
+                }
+                switch(action.type) {
+                  case 'JIAN' : 
+                  return {
+                    ...state,
+                    count: state.count - action.n
+                  }
+                  case 'JIA' : 
+                  return {
+                    ...state,
+                    count: state.count + action.n
+                  } 
+                  break
+                  default:
+                    break
+                }
+        }
+        const createStore = (reduce) => {
+          let state = null
+          // 获取状态值
+          const getState = () => state
+          let listeners = []
+          // 订阅 将要执行的函数订阅到里面去
+          const subcrime = (listener) => listeners.push(listener)
+          // 触发改变状态
+          const dispatch = (action) => {
+            state = reduce(state,action)
+            listeners.forEach((lister, index) => lister())
+          }
+          dispatch({})
+          return {
+            getState,
+            dispatch,
+            subcrime
+          }
+        }
+        const store = createStore(reduce)
+        
+        const renderCount = () => {
+          countDispay.innerHTML = store.getState().count
+        }
+        store.subcrime(renderCount)
+        renderCount()
+      </script>
+    </body>
+    
+</html>

@@ -1,0 +1,178 @@
+1.class与style绑定比较特殊  有三目运算符绑定   数组形式  对象形式均可绑定   每个属性都有其
+get 和set 方法  
+
+2.事件修饰符
+   @click.stop   阻止冒泡行为  .prevent 阻止默认行为  .slef 事件只在自己身上执行  .once 
+事件执行一次之后就解绑
+   
+3. vue父子间的通信  
+1.1 通过this.$emit() 从子组件向父组件传递信息后者调用父组件的方法
+ 1.2   ref 定义在标签上代表的是当前绑定的标签    绑定在子组件上表示的是当前子组件
+可以通过this.$refs.childName 来向子组件通信或者调用子组件的方法
+
+4.  非父子间通信 
+  建立一个bus 事件总线  import Vue from 'vue'
+   export default new Vue({}) 
+在需要注册事件的地方用bus.$emit()注册事件  在需要监听的地方引入bus 并在mounted中用
+this.$on()  监听事件
+
+5. 动态组件  
+    component  标签上的is 属性 指向组件   当更换展示组件时 is 属性会替换内部组件 
+   可以用 keep-alive  标签包裹着组件   当更换组件的时候会保持上一次组件初始状态 
+
+6. transition  动画的使用
+ name 属性绑定动画名字  
+然后直接定义动画  .foote-enter-active, .foote-leave-active{
+  transition: all 1.5s;
+}
+.foote-enter, .foote-leave-to{
+  opacity: 0;
+  transform: translateX(100px)
+}
+也可以定义动画帧 的方式来定义
+.footbounce-enter-active {
+   animation: bounce-in .5s
+}
+.footbounce-leave-active {
+   animation: bounce-in .5s reverse
+}
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: translateX(100px)
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px)
+  }
+}
+多元素过渡   
+加上一个key保证元素渲染的时候重新渲染   mode模式   out-in 先出后进 in-out  先进后出
+ 列表渲染用  <transition-group>标签   name 属性绑定定义的动画    tag 标签指定要渲染成的
+标签类型   在每个li 上加上一个key 属性  不能是index 索引值
+
+
+1. Vue.component('button-counter', {
+  data: function () {
+    return {
+      count: 0
+    }
+  },
+  template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+})
+注册全局组件  在此组件注册后的任何地方都可以引用它
+
+局部注册组件  new Vue({
+  el: '#app',
+  components: {
+    'component-a': ComponentA,
+    'component-b': ComponentB
+  }
+})
+
+components 定义的是一个对象  以键值对的形式注册组件
+
+2.props 如果不检查类型  就直接用数组接收  如果要检查类型就直接用对象的形式接收
+example:
+props: ['title', 'likes', 'isPublished', 'commentIds', 'author']。
+props: {
+  title: String,
+  likes: Number,
+  isPublished: Boolean,
+  commentIds: Array,
+  author: Object,
+  callback: Function,
+  contactsPromise: Promise // or any other constructor
+}
+
+动态props 可以用 v-bind:绑定属性传  其接收的时候和静态属性同种方式接收即可
+
+props验证  包括设置默认值等Vue.component('my-component', {
+  props: {
+    // 基础的类型检查 (`null` 和 `undefined` 会通过任何类型验证)
+    propA: Number,
+    // 多个可能的类型
+    propB: [String, Number],
+    // 必填的字符串
+    propC: {
+      type: String,
+      required: true
+    },
+    // 带有默认值的数字
+    propD: {
+      type: Number,
+      default: 100
+    },
+    // 带有默认值的对象
+    propE: {
+      type: Object,
+      // 对象或数组默认值必须从一个工厂函数获取
+      default: function () {
+        return { message: 'hello' }
+      }
+    },
+    // 自定义验证函数
+    propF: {
+      validator: function (value) {
+        // 这个值必须匹配下列字符串中的一个
+        return ['success', 'warning', 'danger'].indexOf(value) !== -1
+      }
+    }
+  }
+})
+
+3.自定义事件
+不同于组件和 prop，事件名不会被用作一个 JavaScript 变量名或属性名，所以就没有理由使用
+ camelCase 或 PascalCase 了。
+并且 v-on 事件监听器在 DOM 模板中会被自动转换为全小写 (因为 HTML 是大小写不敏感的)，
+所以 v-on:myEvent 将会变成 v-on:myevent——导致 myEvent 不可能被监听到。
+
+4.slot  动态填充内容   感觉很像react 的 this.props.children  效果一样
+<navigation-link url="/profile">
+  Your Profile
+</navigation-link>
+然后你在 <navigation-link> 的模板中可能会写为：
+
+<a
+  v-bind:href="url"
+  class="nav-link"
+>
+  <slot>后背内容</slot>
+</a>
+
+插槽里面可以嵌入组件   标签等内容    可以在插槽里放入后备内容   当组件里面没有放入内容时
+就可以直接渲染后备内容
+
+一个不带 name 的 <slot> 出口会带有隐含的名字“default”。	
+
+
+ for(let j = 0; j < dataList.length; j++){
+          if(!this.delileryArr(dataList[j],treeArr)){
+            if(dataList[i].bh === dataList[j].sjbh){
+              let newObj = {
+                title: dataList[j].mc,
+                value: dataList[j].bh,
+                key: dataList[j].sjbh,
+                bh: dataList[j].bh,
+                sjbh: dataList[j].sjbh 
+              };
+              if(!obj.children) {
+                obj.children = [];
+              }
+              obj.children.push(newObj);
+            }else if(dataList[i].sjbh === dataList[j].bh){
+              let newObj = {
+                title: dataList[j].mc,
+                value: dataList[j].bh,
+                key: dataList[j].sjbh,
+                bh: dataList[j].bh,
+                sjbh: dataList[j].sjbh 
+              };
+              if (!newObj.children) {
+                newObj.children = [];
+              }
+              newObj.children.push(obj);
+              obj = newObj;
+            }
+          }
+        }
